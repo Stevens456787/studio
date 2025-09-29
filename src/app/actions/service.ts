@@ -2,6 +2,7 @@
 
 import { ServiceRequestSchema, type ServiceRequestFormValues } from '@/lib/schemas';
 import { z } from 'zod';
+import { saveServiceRequest } from '@/lib/db';
 
 interface ActionResult {
   success: boolean;
@@ -13,18 +14,13 @@ export async function submitServiceRequest(values: ServiceRequestFormValues): Pr
   try {
     const validatedData = ServiceRequestSchema.parse(values);
 
-    // Simulate API call or database interaction
-    console.log('Service Request Submitted:', validatedData);
-    
-    // Simulate generating a request ID
-    const requestId = `FA-${Date.now().toString().slice(-6)}`;
-
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+    // Save to DB
+    const record = await saveServiceRequest(validatedData);
 
     return {
       success: true,
-      message: 'Service request submitted successfully! Your request ID is ' + requestId,
-      requestId: requestId,
+      message: 'Service request submitted successfully! Your request ID is ' + record.id,
+      requestId: record.id,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

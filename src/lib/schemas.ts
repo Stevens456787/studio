@@ -12,7 +12,8 @@ export const ServiceRequestSchema = z.object({
 export type ServiceRequestFormValues = z.infer<typeof ServiceRequestSchema>;
 
 export const DiagnosticFormSchema = z.object({
-  problemDescription: z.string().min(10, { message: "Problem description must be at least 10 characters long to diagnose effectively." }),
+    problemDescription: z.string().min(10, { message: "Problem description must be at least 10 characters long to diagnose effectively." }),
+    mediaDataUri: z.string().optional().describe("An optional photo or short video (e.g., up to 1 minute, 50MB) of the equipment problem, as a data URI. Excpected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 
 export type DiagnosticFormValues = z.infer<typeof DiagnosticFormSchema>;

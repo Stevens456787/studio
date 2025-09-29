@@ -49,7 +49,7 @@ export default function TechnicianCard({ technician }: TechnicianCardProps) {
       </CardContent>
       <CardFooter className="p-6 pt-0">
         <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          Request {technician.name.split(' ')[0]}
+          Request {technician.name.split(' , ')[0]}
         </Button>
       </CardFooter>
     </Card>

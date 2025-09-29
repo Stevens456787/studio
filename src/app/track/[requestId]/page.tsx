@@ -24,7 +24,7 @@ const mockStatusUpdates = [
 ];
 
 
-export default function TrackRequestPage({ params }: TrackPageProps) {
+export default async function TrackRequestPage({ params }: TrackPageProps) {
   const { requestId } = params;
 
   // Mock data based on a hypothetical requestId

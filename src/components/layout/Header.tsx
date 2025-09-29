@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
-import { Briefcase, CircuitBoard } from 'lucide-react';
+import { CircuitBoard } from 'lucide-react';
 
 export default function Header() {
   return (

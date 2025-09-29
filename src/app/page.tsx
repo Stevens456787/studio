@@ -8,6 +8,7 @@ const mockTechnicians = [
   { id: '1', name: 'Alice Wonderland', expertise: ['HVAC', 'Plumbing'], rating: 4.8, availability: 'Available Now', avatarUrl: 'https://picsum.photos/seed/alice/400/300' },
   { id: '2', name: 'Bob The Builder', expertise: ['Electrical', 'Appliances'], rating: 4.5, availability: 'Next: Tomorrow AM', avatarUrl: 'https://picsum.photos/seed/bob/400/300' },
   { id: '3', name: 'Carol Danvers', expertise: ['Smart Home', 'Security'], rating: 4.9, availability: 'Available Now', avatarUrl: 'https://picsum.photos/seed/carol/400/300' },
+  { id: '4',name: 'Carol Danvers', expertise: ['Smart Home', 'Security'], rating: 4.9, availability: 'Available Now', avatarUrl: 'https://picsum.photos/seed/carol/400/300' },
 ];
 
 export default function HomePage() {
