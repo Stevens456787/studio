@@ -6,7 +6,6 @@ interface MapViewProps {
   technicianName: string;
   requestId: string;
 }
-
 export default function MapView({ technicianName, requestId }: MapViewProps) {
   // In a real app, this would integrate with a mapping library (e.g., Vis.GL, Google Maps)
   // and use real-time location data.

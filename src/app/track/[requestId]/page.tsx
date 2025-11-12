@@ -7,7 +7,7 @@ import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 // For now, we use mock data.
 
 interface TrackPageProps {
-  params: { requestId: string };
+  params: { requestId: string } | Promise<{ requestId: string }>;
 }
 
 // Mock status updates for demonstration
@@ -23,9 +23,9 @@ const mockStatusUpdates = [
   "Service completed successfully."
 ];
 
-
 export default async function TrackRequestPage({ params }: TrackPageProps) {
-  const { requestId } = params;
+  const resolvedParams = await params;
+  const { requestId } = resolvedParams;
 
   // Mock data based on a hypothetical requestId
   const technicianName = "David Miller";
