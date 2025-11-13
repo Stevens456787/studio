@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { CircuitBoard } from 'lucide-react';
+import QuickTrackForm from './QuickTrackForm';
 
 export default function Header() {
   return (
@@ -12,10 +13,7 @@ export default function Header() {
           <Button variant="ghost" asChild>
             <Link href="/">Request Service</Link>
           </Button>
-          {/* Example: Link to a generic tracking overview, or user could input ID */}
-          <Button variant="ghost" asChild>
-            <Link href="/track/example-request-id">Track Service</Link>
-          </Button>
+          <QuickTrackForm />
           <Button variant="outline" asChild>
             <Link href="/admin/diagnostics" className="flex items-center gap-2">
               <CircuitBoard className="h-4 w-4" />

@@ -1,0 +1,22 @@
+[
+  {
+    "requestId": "SR-mhx1fbv8-4vt9rpz",
+    "technicianName": "FieldAssist Pro",
+    "startLat": -1.2944548550440294,
+    "startLng": 36.82191419478244,
+    "destinationLat": -1.3029943873709657,
+    "destinationLng": 36.78935449333774,
+    "currentLat": -1.2944643056483975,
+    "currentLng": 36.8218781613271,
+    "progress": 0.0011066887513756362,
+    "startedAt": "2025-11-13T06:18:18.783Z",
+    "durationMinutes": 41.734666684613,
+    "etaMinutes": 42,
+    "speedKmh": 30.24781781943867,
+    "headingDegrees": 255.2998807128469,
+    "trafficDelayMinutes": 0,
+    "lastUpdated": "2025-11-13T06:18:21.607Z"
+  }
+]18:21.607Z"
+  }
+]

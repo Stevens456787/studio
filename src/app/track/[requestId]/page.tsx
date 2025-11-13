@@ -2,12 +2,13 @@ import MapView from '@/components/tracking/MapView';
 import TechnicianStatusCard from '@/components/tracking/TechnicianStatusCard';
 import { Separator } from '@/components/ui/separator';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { getLiveTechnicianLocation } from '@/lib/tracking';
 
 // This page would typically fetch real data based on requestId
 // For now, we use mock data.
 
 interface TrackPageProps {
-  params: { requestId: string } | Promise<{ requestId: string }>;
+  params: Promise<{ requestId: string }>;
 }
 
 // Mock status updates for demonstration
@@ -24,14 +25,10 @@ const mockStatusUpdates = [
 ];
 
 export default async function TrackRequestPage({ params }: TrackPageProps) {
-  const resolvedParams = await params;
-  const { requestId } = resolvedParams;
+  const { requestId } = await params;
 
-  // Mock data based on a hypothetical requestId
   const technicianName = "David Miller";
-  const initialEtaMinutes = 45; // Example ETA
 
-  // Simulate different scenarios based on requestId for variety
   let currentStatusMessage = "Fetching status...";
   let alertType: 'info' | 'warning' | 'success' = 'info';
 
@@ -43,9 +40,8 @@ export default async function TrackRequestPage({ params }: TrackPageProps) {
     alertType = 'success';
   }
 
-
   if (alertType !== 'info') {
-     const Icon = alertType === 'warning' ? AlertTriangle : CheckCircle;
+    const Icon = alertType === 'warning' ? AlertTriangle : CheckCircle;
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Icon className={`h-16 w-16 mb-4 ${alertType === 'warning' ? 'text-destructive' : 'text-green-500'}`} />
@@ -55,6 +51,8 @@ export default async function TrackRequestPage({ params }: TrackPageProps) {
     );
   }
 
+  const liveLocation = await getLiveTechnicianLocation(requestId, technicianName);
+  const initialEtaMinutes = liveLocation?.etaMinutes ?? 45;
 
   return (
     <div className="space-y-8">
@@ -67,7 +65,7 @@ export default async function TrackRequestPage({ params }: TrackPageProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
-          <MapView technicianName={technicianName} requestId={requestId} />
+          <MapView technicianName={technicianName} requestId={requestId} initialLocation={liveLocation} />
         </div>
         <div className="lg:col-span-1">
           <TechnicianStatusCard 

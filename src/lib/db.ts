@@ -1,10 +1,16 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { adminFirestore } from './firebase-admin';
 import { ServiceRequestFormValues, DiagnosticFormValues } from './schemas';
+
+const SERVICE_COLLECTION = adminFirestore?.collection('serviceRequests');
+const DIAGNOSTIC_COLLECTION = adminFirestore?.collection('diagnostics');
+const TRACKING_COLLECTION = adminFirestore?.collection('technicianTracking');
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const SERVICE_DB = path.join(DATA_DIR, 'service_requests.json');
 const DIAGNOSTIC_DB = path.join(DATA_DIR, 'diagnostics.json');
+const TRACKING_DB = path.join(DATA_DIR, 'technician_tracking.json');
 
 export type ServiceRequestRecord = ServiceRequestFormValues & {
   id: string;
@@ -17,71 +23,191 @@ export type DiagnosticRecord = DiagnosticFormValues & {
   aiOutput?: any;
 };
 
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch (err) {
-    // ignore
-  }
-}
-
-async function readJson(file: string): Promise<any[]> {
-  try {
-    const raw = await fs.readFile(file, 'utf-8');
-    return JSON.parse(raw);
-  } catch (err) {
-    return [];
-  }
-}
-
-async function writeJson(file: string, data: any[]) {
-  await ensureDataDir();
-  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8');
+export interface TechnicianLocationRecord {
+  requestId: string;
+  technicianName: string;
+  startLat: number;
+  startLng: number;
+  destinationLat: number;
+  destinationLng: number;
+  currentLat: number;
+  currentLng: number;
+  progress: number;
+  startedAt: string;
+  durationMinutes: number;
+  etaMinutes: number;
+  speedKmh: number;
+  headingDegrees: number;
+  trafficDelayMinutes: number;
+  lastUpdated: string;
 }
 
 function makeId(prefix = '') {
   return prefix + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
 }
 
+async function ensureDataDir() {
+  await fs.mkdir(DATA_DIR, { recursive: true }).catch(() => undefined);
+}
+
+async function readJson<T>(file: string): Promise<T[]> {
+  try {
+    const raw = await fs.readFile(file, 'utf-8');
+    return JSON.parse(raw) as T[];
+  } catch {
+    return [];
+  }
+}
+
+async function writeJson<T>(file: string, data: T[]) {
+  await ensureDataDir();
+  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+function normalizeServiceRecord(record: ServiceRequestRecord): ServiceRequestRecord {
+  return {
+    ...record,
+    preferredDate:
+      record.preferredDate instanceof Date
+        ? record.preferredDate
+        : new Date(record.preferredDate as unknown as string),
+  };
+}
+
+function deserializeServiceRequestDoc(doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>): ServiceRequestRecord {
+  const data = doc.data();
+  if (!data) {
+    throw new Error('Service request not found');
+  }
+  return normalizeServiceRecord({
+    ...(data as Omit<ServiceRequestRecord, 'preferredDate'>),
+    preferredDate: data.preferredDate ? new Date(data.preferredDate) : new Date(),
+    id: data.id ?? doc.id,
+    createdAt: data.createdAt ?? doc.createTime?.toDate().toISOString() ?? new Date().toISOString(),
+  } as ServiceRequestRecord);
+}
+
+function deserializeDiagnosticDoc(doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>): DiagnosticRecord {
+  const data = doc.data();
+  if (!data) {
+    throw new Error('Diagnostic not found');
+  }
+  return {
+    ...(data as DiagnosticRecord),
+    id: data.id ?? doc.id,
+    createdAt: data.createdAt ?? doc.createTime?.toDate().toISOString() ?? new Date().toISOString(),
+  };
+}
+
 export async function saveServiceRequest(values: ServiceRequestFormValues): Promise<ServiceRequestRecord> {
-  const records = await readJson(SERVICE_DB);
+  if (SERVICE_COLLECTION) {
+    const id = makeId('SR-');
+    const createdAt = new Date().toISOString();
+    const payload = {
+      ...values,
+      id,
+      preferredDate: values.preferredDate?.toISOString(),
+      createdAt,
+    };
+    await SERVICE_COLLECTION.doc(id).set(payload);
+    return {
+      ...values,
+      id,
+      createdAt,
+    };
+  }
+
+  const records = await readJson<ServiceRequestRecord>(SERVICE_DB);
   const record: ServiceRequestRecord = {
     ...values,
     id: makeId('SR-'),
     createdAt: new Date().toISOString(),
-  } as any;
+  };
   records.push(record);
   await writeJson(SERVICE_DB, records);
   return record;
 }
 
 export async function listServiceRequests(): Promise<ServiceRequestRecord[]> {
-  return readJson(SERVICE_DB);
+  if (SERVICE_COLLECTION) {
+    const snapshot = await SERVICE_COLLECTION.orderBy('createdAt', 'desc').get();
+    return snapshot.docs.map(deserializeServiceRequestDoc);
+  }
+  const records = await readJson<ServiceRequestRecord>(SERVICE_DB);
+  return records.map(normalizeServiceRecord);
 }
 
 export async function getServiceRequestById(id: string): Promise<ServiceRequestRecord | undefined> {
-  const records: ServiceRequestRecord[] = await readJson(SERVICE_DB);
-  return records.find(r => r.id === id);
+  if (SERVICE_COLLECTION) {
+    const doc = await SERVICE_COLLECTION.doc(id).get();
+    if (!doc.exists) return undefined;
+    return deserializeServiceRequestDoc(doc);
+  }
+  const records = await readJson<ServiceRequestRecord>(SERVICE_DB);
+  const record = records.find(r => r.id === id);
+  return record ? normalizeServiceRecord(record) : undefined;
 }
 
 export async function saveDiagnostic(values: DiagnosticFormValues, aiOutput?: any): Promise<DiagnosticRecord> {
-  const records = await readJson(DIAGNOSTIC_DB);
+  if (DIAGNOSTIC_COLLECTION) {
+    const id = makeId('DIAG-');
+    const createdAt = new Date().toISOString();
+    const payload = { ...values, aiOutput, id, createdAt };
+    await DIAGNOSTIC_COLLECTION.doc(id).set(payload);
+    return payload;
+  }
+  const records = await readJson<DiagnosticRecord>(DIAGNOSTIC_DB);
   const record: DiagnosticRecord = {
     ...values,
     id: makeId('DIAG-'),
     createdAt: new Date().toISOString(),
     aiOutput,
-  } as any;
+  };
   records.push(record);
   await writeJson(DIAGNOSTIC_DB, records);
   return record;
 }
 
 export async function listDiagnostics(): Promise<DiagnosticRecord[]> {
-  return readJson(DIAGNOSTIC_DB);
+  if (DIAGNOSTIC_COLLECTION) {
+    const snapshot = await DIAGNOSTIC_COLLECTION.orderBy('createdAt', 'desc').get();
+    return snapshot.docs.map(deserializeDiagnosticDoc);
+  }
+  return readJson<DiagnosticRecord>(DIAGNOSTIC_DB);
 }
 
 export async function getDiagnosticById(id: string): Promise<DiagnosticRecord | undefined> {
-  const records: DiagnosticRecord[] = await readJson(DIAGNOSTIC_DB);
+  if (DIAGNOSTIC_COLLECTION) {
+    const doc = await DIAGNOSTIC_COLLECTION.doc(id).get();
+    if (!doc.exists) return undefined;
+    return deserializeDiagnosticDoc(doc);
+  }
+  const records = await readJson<DiagnosticRecord>(DIAGNOSTIC_DB);
   return records.find(r => r.id === id);
+}
+
+export async function upsertTechnicianLocation(record: TechnicianLocationRecord): Promise<TechnicianLocationRecord> {
+  if (TRACKING_COLLECTION) {
+    await TRACKING_COLLECTION.doc(record.requestId).set(record, { merge: true });
+    return record;
+  }
+  const records = await readJson<TechnicianLocationRecord>(TRACKING_DB);
+  const index = records.findIndex(r => r.requestId === record.requestId);
+  if (index >= 0) {
+    records[index] = record;
+  } else {
+    records.push(record);
+  }
+  await writeJson(TRACKING_DB, records);
+  return record;
+}
+
+export async function getTechnicianLocationRecord(requestId: string): Promise<TechnicianLocationRecord | undefined> {
+  if (TRACKING_COLLECTION) {
+    const doc = await TRACKING_COLLECTION.doc(requestId).get();
+    if (!doc.exists) return undefined;
+    return doc.data() as TechnicianLocationRecord;
+  }
+  const records = await readJson<TechnicianLocationRecord>(TRACKING_DB);
+  return records.find(r => r.requestId === requestId);
 }
