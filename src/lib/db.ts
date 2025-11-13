@@ -6,11 +6,13 @@ import { ServiceRequestFormValues, DiagnosticFormValues } from './schemas';
 const SERVICE_COLLECTION = adminFirestore?.collection('serviceRequests');
 const DIAGNOSTIC_COLLECTION = adminFirestore?.collection('diagnostics');
 const TRACKING_COLLECTION = adminFirestore?.collection('technicianTracking');
+const JOB_COLLECTION = adminFirestore?.collection('jobs');
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const SERVICE_DB = path.join(DATA_DIR, 'service_requests.json');
 const DIAGNOSTIC_DB = path.join(DATA_DIR, 'diagnostics.json');
 const TRACKING_DB = path.join(DATA_DIR, 'technician_tracking.json');
+const JOB_DB = path.join(DATA_DIR, 'jobs.json');
 
 export type ServiceRequestRecord = ServiceRequestFormValues & {
   id: string;
@@ -40,6 +42,21 @@ export interface TechnicianLocationRecord {
   headingDegrees: number;
   trafficDelayMinutes: number;
   lastUpdated: string;
+}
+
+export interface JobRecord {
+  id: string;
+  technicianId: string;
+  technicianName: string;
+  status: string;
+  requestedAt: string;
+  source?: string;
+}
+
+export interface JobInput {
+  technicianId: string;
+  technicianName: string;
+  source?: string;
 }
 
 function makeId(prefix = '') {
@@ -210,4 +227,33 @@ export async function getTechnicianLocationRecord(requestId: string): Promise<Te
   }
   const records = await readJson<TechnicianLocationRecord>(TRACKING_DB);
   return records.find(r => r.requestId === requestId);
+}
+
+export async function saveJob(input: JobInput): Promise<JobRecord> {
+  if (JOB_COLLECTION) {
+    const id = makeId('JOB-');
+    const record: JobRecord = {
+      id,
+      technicianId: input.technicianId,
+      technicianName: input.technicianName,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+      source: input.source,
+    };
+    await JOB_COLLECTION.doc(id).set(record);
+    return record;
+  }
+
+  const records = await readJson<JobRecord>(JOB_DB);
+  const record: JobRecord = {
+    id: makeId('JOB-'),
+    technicianId: input.technicianId,
+    technicianName: input.technicianName,
+    status: 'pending',
+    requestedAt: new Date().toISOString(),
+    source: input.source,
+  };
+  records.push(record);
+  await writeJson(JOB_DB, records);
+  return record;
 }

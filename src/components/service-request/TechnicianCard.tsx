@@ -1,8 +1,12 @@
-import Image from 'next/image';
+'use client';
+
+import { useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { UserCheck, Star, Clock, MapPin, BriefcaseBusiness } from 'lucide-react';
+import { UserCheck, Star, Clock, MapPin, BriefcaseBusiness, Loader2 } from 'lucide-react';
+import { logTechnicianJob } from '@/app/actions/jobs';
+import { useToast } from '@/hooks/use-toast';
 
 interface Technician {
   id: string;
@@ -10,7 +14,6 @@ interface Technician {
   expertise: string[];
   rating: number;
   availability: string;
-  avatarUrl: string;
   jobsCompleted: number;
   location: string;
 }
@@ -20,18 +23,39 @@ interface TechnicianCardProps {
 }
 
 export default function TechnicianCard({ technician }: TechnicianCardProps) {
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
+
+  const initials = technician.name
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const handleRequest = () => {
+    startTransition(async () => {
+      const result = await logTechnicianJob({
+        technicianId: technician.id,
+        technicianName: technician.name,
+        source: 'technician-card',
+      });
+      toast({
+        title: result.success ? 'Job created' : 'Request failed',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+    });
+  };
+
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="p-0 bg-muted">
-        <div className="relative flex h-48 w-full items-center justify-center">
-          <Image
-            src={technician.avatarUrl}
-            alt={`${technician.name} - Technician`}
-            fill
-            sizes="(min-width: 1024px) 320px, (min-width: 768px) 280px, 100vw"
-            className="object-contain p-8"
-            data-ai-hint="profile person"
-          />
+        <div className="flex h-48 w-full items-center justify-center">
+          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10 text-3xl font-bold text-primary">
+            {initials}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-6">
@@ -63,8 +87,19 @@ export default function TechnicianCard({ technician }: TechnicianCardProps) {
         </CardDescription>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          Request {technician.name.split(' , ')[0]}
+        <Button
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          disabled={isPending}
+          onClick={handleRequest}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating Job...
+            </>
+          ) : (
+            <>Request {technician.name.split(' , ')[0]}</>
+          )}
         </Button>
       </CardFooter>
     </Card>
