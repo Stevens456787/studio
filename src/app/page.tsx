@@ -20,7 +20,7 @@ const mockTechnicians = [
     jobsCompleted: 214,
     location: 'Westlands, Nairobi',
     availability: 'Available Now',
-    avatarUrl: 'https://img.icons8.com/color/256/maintenance.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1995/1995563.png',
   },
   {
     id: '2',
@@ -30,7 +30,7 @@ const mockTechnicians = [
     jobsCompleted: 188,
     location: 'Upper Hill, Nairobi',
     availability: 'In Field – 45 min',
-    avatarUrl: 'https://img.icons8.com/color/256/electrician.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1995/1995503.png',
   },
   {
     id: '3',
@@ -40,7 +40,7 @@ const mockTechnicians = [
     jobsCompleted: 203,
     location: 'Nyali, Mombasa',
     availability: 'Next Slot 2pm',
-    avatarUrl: 'https://img.icons8.com/color/256/plumber.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3839/3839020.png',
   },
   {
     id: '4',
@@ -50,7 +50,7 @@ const mockTechnicians = [
     jobsCompleted: 245,
     location: 'Kilimani, Nairobi',
     availability: 'Available Now',
-    avatarUrl: 'https://img.icons8.com/color/256/technical-support.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1159/1159379.png',
   },
   {
     id: '5',
@@ -60,7 +60,7 @@ const mockTechnicians = [
     jobsCompleted: 176,
     location: 'Thika Road, Nairobi',
     availability: 'Today – Evening',
-    avatarUrl: 'https://img.icons8.com/color/256/service.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/2965/2965879.png',
   },
   {
     id: '6',
@@ -70,7 +70,7 @@ const mockTechnicians = [
     jobsCompleted: 162,
     location: 'Diani, Kwale',
     availability: 'On Call',
-    avatarUrl: 'https://img.icons8.com/color/256/worker-with-solar-panel.png',
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/2936/2936736.png',
   },
 ];
 
