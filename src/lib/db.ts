@@ -230,29 +230,27 @@ export async function getTechnicianLocationRecord(requestId: string): Promise<Te
 }
 
 export async function saveJob(input: JobInput): Promise<JobRecord> {
-  if (JOB_COLLECTION) {
-    const id = makeId('JOB-');
-    const record: JobRecord = {
-      id,
-      technicianId: input.technicianId,
-      technicianName: input.technicianName,
-      status: 'pending',
-      requestedAt: new Date().toISOString(),
-      source: input.source,
-    };
-    await JOB_COLLECTION.doc(id).set(record);
-    return record;
-  }
-
-  const records = await readJson<JobRecord>(JOB_DB);
+  const id = makeId('JOB-');
   const record: JobRecord = {
-    id: makeId('JOB-'),
+    id,
     technicianId: input.technicianId,
     technicianName: input.technicianName,
     status: 'pending',
     requestedAt: new Date().toISOString(),
     source: input.source,
   };
+
+  if (JOB_COLLECTION) {
+    try {
+      await JOB_COLLECTION.doc(id).set(record);
+      return record;
+    } catch (error) {
+      console.error('Failed to save job to Firestore:', error);
+      // Fall back to local storage if Firestore fails
+    }
+  }
+
+  const records = await readJson<JobRecord>(JOB_DB);
   records.push(record);
   await writeJson(JOB_DB, records);
   return record;

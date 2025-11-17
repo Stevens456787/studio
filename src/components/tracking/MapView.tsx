@@ -108,69 +108,86 @@ export default function MapView({ technicianName, requestId, initialLocation }: 
     const startCoords: [number, number] = [startLng, startLat];
     const routeSourceId = `route-line-${requestId}`;
 
-    if (!map.getSource(routeSourceId)) {
-      map.addSource(routeSourceId, {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: {
-            type: 'LineString',
-            coordinates: [startCoords, destinationCoords],
+    const applyUpdates = () => {
+      if (!map.getSource(routeSourceId)) {
+        map.addSource(routeSourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: [startCoords, destinationCoords],
+            },
+            properties: {},
           },
-          properties: {},
-        },
-      });
-      map.addLayer({
-        id: `${routeSourceId}-layer`,
-        type: 'line',
-        source: routeSourceId,
-        paint: {
-          'line-color': '#2563eb',
-          'line-width': 4,
-          'line-dasharray': [1, 1.8],
-          'line-opacity': 0.7,
-        },
-      });
+        });
+        map.addLayer({
+          id: `${routeSourceId}-layer`,
+          type: 'line',
+          source: routeSourceId,
+          paint: {
+            'line-color': '#2563eb',
+            'line-width': 4,
+            'line-dasharray': [1, 1.8],
+            'line-opacity': 0.7,
+          },
+        });
+      }
+
+      if (!destinationMarkerRef.current) {
+        destinationMarkerRef.current = new mapModule.Marker({ color: '#22c55e' })
+          .setLngLat(destinationCoords)
+          .setPopup(new mapModule.Popup({ closeButton: false }).setHTML('<strong>Destination</strong>'));
+        destinationMarkerRef.current.addTo(map);
+      } else {
+        destinationMarkerRef.current.setLngLat(destinationCoords);
+      }
+
+      if (!technicianMarkerRef.current) {
+        technicianMarkerRef.current = new mapModule.Marker({
+          color: '#f97316',
+          scale: 1.2,
+        })
+          .setLngLat(technicianCoords)
+          .setPopup(
+            new mapModule.Popup({ closeButton: false }).setHTML(
+              `<strong>${technicianName}</strong><br/>On the way`,
+            ),
+          );
+        technicianMarkerRef.current.addTo(map);
+      } else {
+        technicianMarkerRef.current.setLngLat(technicianCoords);
+      }
+
+      if (!hasFitBoundsRef.current) {
+        hasFitBoundsRef.current = true;
+        const bounds = new mapModule.LngLatBounds(technicianCoords, technicianCoords);
+        bounds.extend(destinationCoords);
+        bounds.extend(startCoords);
+        map.fitBounds(bounds, { padding: 60, duration: 800 });
+      } else {
+        map.easeTo({
+          center: technicianCoords,
+          duration: 800,
+          zoom: Math.max(map.getZoom(), 13),
+        });
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      applyUpdates();
+      return;
     }
 
-    if (!destinationMarkerRef.current) {
-      destinationMarkerRef.current = new mapModule.Marker({ color: '#22c55e' })
-        .setLngLat(destinationCoords)
-        .setPopup(new mapModule.Popup({ closeButton: false }).setHTML('<strong>Destination</strong>'));
-      destinationMarkerRef.current.addTo(map);
-    } else {
-      destinationMarkerRef.current.setLngLat(destinationCoords);
-    }
+    const handleLoad = () => {
+      applyUpdates();
+      map.off('load', handleLoad);
+    };
 
-    if (!technicianMarkerRef.current) {
-      technicianMarkerRef.current = new mapModule.Marker({
-        color: '#f97316',
-        scale: 1.2,
-      })
-        .setLngLat(technicianCoords)
-        .setPopup(
-          new mapModule.Popup({ closeButton: false }).setHTML(
-            `<strong>${technicianName}</strong><br/>On the way`,
-          ),
-        );
-      technicianMarkerRef.current.addTo(map);
-    } else {
-      technicianMarkerRef.current.setLngLat(technicianCoords);
-    }
-
-    if (!hasFitBoundsRef.current) {
-      hasFitBoundsRef.current = true;
-      const bounds = new mapModule.LngLatBounds(technicianCoords, technicianCoords);
-      bounds.extend(destinationCoords);
-      bounds.extend(startCoords);
-      map.fitBounds(bounds, { padding: 60, duration: 800 });
-    } else {
-      map.easeTo({
-        center: technicianCoords,
-        duration: 800,
-        zoom: Math.max(map.getZoom(), 13),
-      });
-    }
+    map.on('load', handleLoad);
+    return () => {
+      map.off('load', handleLoad);
+    };
   }, [location, mapModule, requestId, technicianName]);
 
   const statusCopy = useMemo(() => {
