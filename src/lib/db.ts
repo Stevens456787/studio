@@ -17,6 +17,7 @@ const JOB_DB = path.join(DATA_DIR, 'jobs.json');
 export type ServiceRequestRecord = ServiceRequestFormValues & {
   id: string;
   createdAt: string;
+  status: string;
 };
 
 export type DiagnosticRecord = DiagnosticFormValues & {
@@ -84,6 +85,7 @@ async function writeJson<T>(file: string, data: T[]) {
 function normalizeServiceRecord(record: ServiceRequestRecord): ServiceRequestRecord {
   return {
     ...record,
+    status: record.status ?? 'pending',
     preferredDate:
       record.preferredDate instanceof Date
         ? record.preferredDate
@@ -125,12 +127,14 @@ export async function saveServiceRequest(values: ServiceRequestFormValues): Prom
       id,
       preferredDate: values.preferredDate?.toISOString(),
       createdAt,
+      status: 'pending',
     };
     await SERVICE_COLLECTION.doc(id).set(payload);
     return {
       ...values,
       id,
       createdAt,
+      status: 'pending',
     };
   }
 
@@ -139,6 +143,7 @@ export async function saveServiceRequest(values: ServiceRequestFormValues): Prom
     ...values,
     id: makeId('SR-'),
     createdAt: new Date().toISOString(),
+    status: 'pending',
   };
   records.push(record);
   await writeJson(SERVICE_DB, records);
@@ -163,6 +168,16 @@ export async function getServiceRequestById(id: string): Promise<ServiceRequestR
   const records = await readJson<ServiceRequestRecord>(SERVICE_DB);
   const record = records.find(r => r.id === id);
   return record ? normalizeServiceRecord(record) : undefined;
+}
+
+export async function findServiceRequestsByContact(contact: string): Promise<ServiceRequestRecord[]> {
+  const normalized = contact.trim().toLowerCase();
+  const requests = await listServiceRequests();
+  return requests.filter(req => {
+    const phoneMatch = req.phoneNumber?.toLowerCase() === normalized;
+    const emailMatch = (req.email ?? '').toLowerCase() === normalized;
+    return phoneMatch || emailMatch;
+  });
 }
 
 export async function saveDiagnostic(values: DiagnosticFormValues, aiOutput?: any): Promise<DiagnosticRecord> {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,19 +8,10 @@ import { Button } from '@/components/ui/button';
 import { UserCheck, Star, Clock, MapPin, BriefcaseBusiness, Loader2 } from 'lucide-react';
 import { logTechnicianJob } from '@/app/actions/jobs';
 import { useToast } from '@/hooks/use-toast';
-
-interface Technician {
-  id: string;
-  name: string;
-  expertise: string[];
-  rating: number;
-  availability: string;
-  jobsCompleted: number;
-  location: string;
-}
+import type { TechnicianProfile } from '@/data/technicians';
 
 interface TechnicianCardProps {
-  technician: Technician;
+  technician: TechnicianProfile;
 }
 
 export default function TechnicianCard({ technician }: TechnicianCardProps) {
@@ -86,9 +78,12 @@ export default function TechnicianCard({ technician }: TechnicianCardProps) {
           ))}
         </CardDescription>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
+      <CardFooter className="p-6 pt-0 flex flex-col gap-2 sm:flex-row">
+        <Button asChild variant="outline" className="w-full sm:w-auto">
+          <Link href={`/technicians/${technician.id}`}>View Profile</Link>
+        </Button>
         <Button
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="w-full sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
           disabled={isPending}
           onClick={handleRequest}
         >

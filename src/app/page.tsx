@@ -9,70 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-
-// Mock data for technicians
-const mockTechnicians = [
-  {
-    id: '1',
-    name: 'Alice Kamau',
-    expertise: ['HVAC Optimization', 'Cold Chain'],
-    rating: 4.98,
-    jobsCompleted: 214,
-    location: 'Westlands, Nairobi',
-    availability: 'Available Now',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1995/1995563.png',
-  },
-  {
-    id: '2',
-    name: 'Brian Otieno',
-    expertise: ['Smart Panels', 'Commercial Electrical'],
-    rating: 4.95,
-    jobsCompleted: 188,
-    location: 'Upper Hill, Nairobi',
-    availability: 'In Field – 45 min',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1995/1995503.png',
-  },
-  {
-    id: '3',
-    name: 'Christine Wanjiku',
-    expertise: ['Premium Plumbing', 'Water Harvesting'],
-    rating: 4.92,
-    jobsCompleted: 203,
-    location: 'Nyali, Mombasa',
-    availability: 'Next Slot 2pm',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3839/3839020.png',
-  },
-  {
-    id: '4',
-    name: 'David Mwangi',
-    expertise: ['Smart Home Mesh', 'Security Systems'],
-    rating: 4.97,
-    jobsCompleted: 245,
-    location: 'Kilimani, Nairobi',
-    availability: 'Available Now',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/1159/1159379.png',
-  },
-  {
-    id: '5',
-    name: 'Evelyn Achieng',
-    expertise: ['Appliance Rehab', 'Energy Audits'],
-    rating: 4.94,
-    jobsCompleted: 176,
-    location: 'Thika Road, Nairobi',
-    availability: 'Today – Evening',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/2965/2965879.png',
-  },
-  {
-    id: '6',
-    name: 'Farid Hassan',
-    expertise: ['Solar Pumping', 'Rural Install'],
-    rating: 4.91,
-    jobsCompleted: 162,
-    location: 'Diani, Kwale',
-    availability: 'On Call',
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/2936/2936736.png',
-  },
-];
+import { technicians } from '@/data/technicians';
 
 export default function HomePage() {
   return (
@@ -100,7 +37,7 @@ export default function HomePage() {
           Our Available Experts
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockTechnicians.map(tech => (
+          {technicians.map(tech => (
             <TechnicianCard key={tech.id} technician={tech} />
           ))}
         </div>

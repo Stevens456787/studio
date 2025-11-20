@@ -14,6 +14,9 @@ export default function Header() {
             <Link href="/">Request Service</Link>
           </Button>
           <QuickTrackForm />
+          <Button variant="ghost" asChild>
+            <Link href="/portal">Customer Portal</Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link href="/admin/diagnostics" className="flex items-center gap-2">
               <CircuitBoard className="h-4 w-4" />

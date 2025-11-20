@@ -115,6 +115,7 @@ export default function ServiceRequestForm() {
     defaultValues: {
       fullName: '',
       phoneNumber: '',
+      email: '',
       address: '',
       problemDescription: '',
       preferredDate: undefined,
@@ -200,7 +201,7 @@ export default function ServiceRequestForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
             name="fullName"
@@ -228,6 +229,22 @@ export default function ServiceRequestForm() {
                 </FormLabel>
                 <FormControl>
                   <Input type="tel" placeholder="e.g. +1234567890" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email (optional)
+                </FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="e.g. you@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

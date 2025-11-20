@@ -16,6 +16,7 @@ const ContactMethodEnum = z.enum(CONTACT_METHOD_OPTIONS);
 export const ServiceRequestSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number format." }),
+  email: z.string().email({ message: "Please provide a valid email address." }).optional().or(z.literal('')).optional(),
   address: z.string().min(10, { message: "Address must be at least 10 characters." }),
   problemDescription: z.string().min(10, { message: "Problem description must be at least 10 characters." }),
   preferredDate: z.date({ required_error: "Preferred date is required." }),
