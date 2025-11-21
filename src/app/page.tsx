@@ -1,5 +1,4 @@
 import ServiceRequestForm from '@/components/service-request/ServiceRequestForm';
-import TechnicianCard from '@/components/service-request/TechnicianCard';
 import { Separator } from '@/components/ui/separator';
 import { UserCheck, ShieldCheck, Clock, Award, HelpCircle, Sparkles, ClipboardList, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { technicians } from '@/data/technicians';
+import TechnicianDirectory from '@/components/technicians/TechnicianDirectory';
 
 export default function HomePage() {
   return (
@@ -36,11 +36,7 @@ export default function HomePage() {
           <UserCheck className="h-8 w-8 text-primary" />
           Our Available Experts
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {technicians.map(tech => (
-            <TechnicianCard key={tech.id} technician={tech} />
-          ))}
-        </div>
+        <TechnicianDirectory technicians={technicians} />
          <p className="mt-6 text-sm text-center text-muted-foreground">
           * Technician availability is illustrative. Actual assignment based on location and specific needs.
         </p>
