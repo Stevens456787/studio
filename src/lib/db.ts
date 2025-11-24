@@ -7,12 +7,14 @@ const SERVICE_COLLECTION = adminFirestore?.collection('serviceRequests');
 const DIAGNOSTIC_COLLECTION = adminFirestore?.collection('diagnostics');
 const TRACKING_COLLECTION = adminFirestore?.collection('technicianTracking');
 const JOB_COLLECTION = adminFirestore?.collection('jobs');
+const TECHNICIAN_COLLECTION = adminFirestore?.collection('technicians');
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const SERVICE_DB = path.join(DATA_DIR, 'service_requests.json');
 const DIAGNOSTIC_DB = path.join(DATA_DIR, 'diagnostics.json');
 const TRACKING_DB = path.join(DATA_DIR, 'technician_tracking.json');
 const JOB_DB = path.join(DATA_DIR, 'jobs.json');
+const TECHNICIAN_DB = path.join(DATA_DIR, 'technicians.json');
 
 export type ServiceRequestRecord = ServiceRequestFormValues & {
   id: string;
@@ -58,6 +60,22 @@ export interface JobInput {
   technicianId: string;
   technicianName: string;
   source?: string;
+}
+
+export interface TechnicianRecord {
+  id: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+  specialties: string[];
+  coverageAreas: string[];
+  certifications: string[];
+  status: 'pending_review' | 'approved' | 'active' | 'inactive';
+  availabilityStatus: 'available_now' | 'next_slot' | 'off';
+  capacity: number;
+  verificationDocs?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 function makeId(prefix = '') {
@@ -269,4 +287,89 @@ export async function saveJob(input: JobInput): Promise<JobRecord> {
   records.push(record);
   await writeJson(JOB_DB, records);
   return record;
+}
+
+export async function findJobsByTechnician(technicianId: string): Promise<JobRecord[]> {
+  if (JOB_COLLECTION) {
+    try {
+      const snapshot = await JOB_COLLECTION.where('technicianId', '==', technicianId).get();
+      return snapshot.docs.map(doc => doc.data() as JobRecord);
+    } catch (error) {
+      console.error('Failed to fetch jobs from Firestore:', error);
+    }
+  }
+  const records = await readJson<JobRecord>(JOB_DB);
+  return records.filter(job => job.technicianId === technicianId);
+}
+
+export async function saveTechnician(record: Omit<TechnicianRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<TechnicianRecord> {
+  const id = makeId('TECH-');
+  const now = new Date().toISOString();
+  const payload: TechnicianRecord = {
+    ...record,
+    id,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  if (TECHNICIAN_COLLECTION) {
+    try {
+      await TECHNICIAN_COLLECTION.doc(id).set(payload);
+      return payload;
+    } catch (error) {
+      console.error('Failed to save technician to Firestore:', error);
+    }
+  }
+
+  const records = await readJson<TechnicianRecord>(TECHNICIAN_DB);
+  records.push(payload);
+  await writeJson(TECHNICIAN_DB, records);
+  return payload;
+}
+
+export async function updateTechnicianStatus(id: string, updates: Partial<TechnicianRecord>): Promise<TechnicianRecord | undefined> {
+  const now = new Date().toISOString();
+  if (TECHNICIAN_COLLECTION) {
+    try {
+      await TECHNICIAN_COLLECTION.doc(id).set({ ...updates, updatedAt: now }, { merge: true });
+      const doc = await TECHNICIAN_COLLECTION.doc(id).get();
+      return doc.data() as TechnicianRecord;
+    } catch (error) {
+      console.error('Failed to update technician in Firestore:', error);
+    }
+  }
+  const records = await readJson<TechnicianRecord>(TECHNICIAN_DB);
+  const index = records.findIndex(t => t.id === id);
+  if (index >= 0) {
+    records[index] = { ...records[index], ...updates, updatedAt: now } as TechnicianRecord;
+    await writeJson(TECHNICIAN_DB, records);
+    return records[index];
+  }
+  return undefined;
+}
+
+export async function listTechnicians(): Promise<TechnicianRecord[]> {
+  if (TECHNICIAN_COLLECTION) {
+    try {
+      const snapshot = await TECHNICIAN_COLLECTION.get();
+      return snapshot.docs.map(doc => doc.data() as TechnicianRecord);
+    } catch (error) {
+      console.error('Failed to list technicians from Firestore:', error);
+    }
+  }
+  return readJson<TechnicianRecord>(TECHNICIAN_DB);
+}
+
+export async function getTechnicianById(id: string): Promise<TechnicianRecord | undefined> {
+  if (TECHNICIAN_COLLECTION) {
+    try {
+      const doc = await TECHNICIAN_COLLECTION.doc(id).get();
+      if (!doc.exists) return undefined;
+      return doc.data() as TechnicianRecord;
+    } catch (error) {
+      console.error('Failed to fetch technician from Firestore:', error);
+    }
+  }
+  const records = await readJson<TechnicianRecord>(TECHNICIAN_DB);
+  return records.find(t => t.id === id);
 }

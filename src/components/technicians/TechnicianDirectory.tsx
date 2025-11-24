@@ -31,6 +31,7 @@ export default function TechnicianDirectory({ technicians }: Props) {
 
   const filtered = useMemo(() => {
     return technicians.filter(tech => {
+      if (tech.status && tech.status !== 'active') return false;
       const locationMatch = tech.location.toLowerCase().includes(locationQuery.toLowerCase());
       const categoryMatch = category === 'all' || tech.expertise.includes(category);
       const availabilityMatch = (() => {

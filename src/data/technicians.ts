@@ -19,6 +19,10 @@ export interface TechnicianProfile {
   coverageAreas: string[];
   recentJobs: TechnicianRecentJob[];
   bio: string;
+  status: 'pending_review' | 'approved' | 'active';
+  availabilityStatus: 'available_now' | 'next_slot' | 'off';
+  capacity: number;
+  verificationDocs?: string[];
 }
 
 export const technicians: TechnicianProfile[] = [
@@ -27,11 +31,14 @@ export const technicians: TechnicianProfile[] = [
     name: 'Alice Kamau',
     headline: 'Lead HVAC & Cold Chain Specialist',
     expertise: ['HVAC Optimization', 'Cold Chain'],
-    rating: 4.98,
-    availability: 'Available Now',
-    jobsCompleted: 214,
-    location: 'Westlands, Nairobi',
-    certifications: ['ASHRAE Certified HVAC Pro', 'Carrier Platinum Installer'],
+  rating: 4.98,
+  availability: 'Available Now',
+  jobsCompleted: 214,
+  location: 'Westlands, Nairobi',
+  status: 'active',
+  availabilityStatus: 'available_now',
+  capacity: 3,
+  certifications: ['ASHRAE Certified HVAC Pro', 'Carrier Platinum Installer'],
     coverageAreas: ['Westlands', 'Parklands', 'Lavington'],
     recentJobs: [
       {
@@ -56,10 +63,13 @@ export const technicians: TechnicianProfile[] = [
     name: 'Brian Otieno',
     headline: 'Commercial Electrical & Smart Panel Expert',
     expertise: ['Smart Panels', 'Commercial Electrical'],
-    rating: 4.95,
-    availability: 'In Field – 45 min',
-    jobsCompleted: 188,
-    location: 'Upper Hill, Nairobi',
+  rating: 4.95,
+  availability: 'In Field – 45 min',
+  jobsCompleted: 188,
+  location: 'Upper Hill, Nairobi',
+  status: 'active',
+  availabilityStatus: 'available_now',
+  capacity: 2,
     certifications: ['KEBS Licensed Electrician', 'Schneider EcoXpert'],
     coverageAreas: ['Upper Hill', 'CBD', 'Kilimani'],
     recentJobs: [
@@ -78,10 +88,13 @@ export const technicians: TechnicianProfile[] = [
     name: 'Christine Wanjiku',
     headline: 'Plumbing & Water Harvesting Engineer',
     expertise: ['Premium Plumbing', 'Water Harvesting'],
-    rating: 4.92,
-    availability: 'Next Slot 2pm',
-    jobsCompleted: 203,
-    location: 'Nyali, Mombasa',
+  rating: 4.92,
+  availability: 'Next Slot 2pm',
+  jobsCompleted: 203,
+  location: 'Nyali, Mombasa',
+  status: 'active',
+  availabilityStatus: 'next_slot',
+  capacity: 2,
     certifications: ['NCA Level 2 Plumber', 'WRAS Approved Installer'],
     coverageAreas: ['Nyali', 'Mombasa CBD', 'Bamburi'],
     recentJobs: [
@@ -100,10 +113,13 @@ export const technicians: TechnicianProfile[] = [
     name: 'David Mwangi',
     headline: 'Smart Home Mesh & Security Specialist',
     expertise: ['Smart Home Mesh', 'Security Systems'],
-    rating: 4.97,
-    availability: 'Available Now',
-    jobsCompleted: 245,
-    location: 'Kilimani, Nairobi',
+  rating: 4.97,
+  availability: 'Available Now',
+  jobsCompleted: 245,
+  location: 'Kilimani, Nairobi',
+  status: 'active',
+  availabilityStatus: 'available_now',
+  capacity: 3,
     certifications: ['Ubiquiti Enterprise Wireless', 'Hikvision Certified Integrator'],
     coverageAreas: ['Kilimani', 'Kileleshwa', 'Karen'],
     recentJobs: [
@@ -122,10 +138,13 @@ export const technicians: TechnicianProfile[] = [
     name: 'Evelyn Achieng',
     headline: 'Appliance Rehab & Energy Auditor',
     expertise: ['Appliance Rehab', 'Energy Audits'],
-    rating: 4.94,
-    availability: 'Today – Evening',
-    jobsCompleted: 176,
-    location: 'Thika Road, Nairobi',
+  rating: 4.94,
+  availability: 'Today – Evening',
+  jobsCompleted: 176,
+  location: 'Thika Road, Nairobi',
+  status: 'active',
+  availabilityStatus: 'next_slot',
+  capacity: 2,
     certifications: ['EPA Refrigeration Tech', 'KPLC Energy Auditor'],
     coverageAreas: ['Thika Road', 'Ruiru', 'Garden Estate'],
     recentJobs: [
@@ -144,10 +163,13 @@ export const technicians: TechnicianProfile[] = [
     name: 'Farid Hassan',
     headline: 'Solar Pumping & Rural Install Lead',
     expertise: ['Solar Pumping', 'Rural Install'],
-    rating: 4.91,
-    availability: 'On Call',
-    jobsCompleted: 162,
-    location: 'Diani, Kwale',
+  rating: 4.91,
+  availability: 'On Call',
+  jobsCompleted: 162,
+  location: 'Diani, Kwale',
+  status: 'active',
+  availabilityStatus: 'off',
+  capacity: 2,
     certifications: ['GOGLA Solar Pumping Pro', 'NITA Certified Technician'],
     coverageAreas: ['Diani', 'Kwale', 'Ukunda'],
     recentJobs: [
